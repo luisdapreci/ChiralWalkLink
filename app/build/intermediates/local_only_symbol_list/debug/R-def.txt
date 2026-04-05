@@ -1,0 +1,13 @@
+R_DEF: Internal format may change without notice
+local
+drawable btn_ds2_bg
+drawable edit_text_ds2_bg
+drawable ic_launcher
+drawable ic_stat_walk
+id ipAddressInput
+id sensitivityLabel
+id sensitivitySlider
+id statusText
+id stepCountText
+id toggleButton
+layout activity_main

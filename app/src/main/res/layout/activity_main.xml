@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0a121d"
+    android:padding="32dp">
+
+    <!-- Header / Title -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="4dp">
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DRAWBRIDGE TERMINAL"
+            android:textColor="#a0c0e0"
+            android:textSize="12sp"
+            android:letterSpacing="0.2"
+            android:fontFamily="sans-serif-medium" />
+            
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginStart="6dp"
+            android:src="@drawable/ic_launcher" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#4000E5FF"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CHIRAL WALK LINK"
+        android:textColor="#ffffff"
+        android:textSize="22sp"
+        android:letterSpacing="0.1"
+        android:fontFamily="sans-serif-condensed"
+        android:layout_marginBottom="32dp"/>
+
+    <!-- IP Input Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="> TARGET PC IP ADDRESS"
+        android:textColor="#00E5FF"
+        android:textSize="12sp"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginBottom="8dp"/>
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/ipAddressInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="e.g. 192.168.1.10"
+        android:textColorHint="#50a0c0e0"
+        android:textColor="#ffffff"
+        android:inputType="textUri"
+        android:background="@drawable/edit_text_ds2_bg"
+        android:fontFamily="sans-serif"
+        android:layout_marginBottom="32dp"/>
+
+    <!-- Action Button -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/toggleButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ACTIVATE LINK"
+        android:textColor="#00E5FF"
+        android:textSize="16sp"
+        android:fontFamily="sans-serif-medium"
+        android:letterSpacing="0.1"
+        android:background="@drawable/btn_ds2_bg"
+        android:padding="16dp"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Status Output -->
+    <TextView
+        android:id="@+id/statusText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CHIRAL NETWORK: OFFLINE"
+        android:textColor="#a0c0e0"
+        android:fontFamily="sans-serif-medium"
+        android:letterSpacing="0.05"
+        android:textSize="14sp"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#2000E5FF"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Configuration Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="> SENSOR SETTINGS"
+        android:textColor="#00E5FF"
+        android:textSize="12sp"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/sensitivityLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sensitivity Threshold: 3.0"
+        android:textColor="#a0c0e0"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif"
+        android:layout_marginBottom="8dp"/>
+
+    <SeekBar
+        android:id="@+id/sensitivitySlider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="30"
+        android:progressTint="#00E5FF"
+        android:thumbTint="#00E5FF"
+        android:layout_marginBottom="32dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#1000E5FF"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="SESSION STEPS"
+            android:textColor="#a0c0e0"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.05"/>
+
+        <TextView
+            android:id="@+id/stepCountText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textColor="#00E5FF"
+            android:textSize="24sp"
+            android:fontFamily="sans-serif-condensed"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+</LinearLayout>
