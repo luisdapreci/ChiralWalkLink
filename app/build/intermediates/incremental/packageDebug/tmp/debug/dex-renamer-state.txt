@@ -1,4 +1,4 @@
-#Mon Apr 06 12:40:59 COT 2026
+#Mon Apr 06 12:51:09 COT 2026
 base.2=C\:\\Users\\luisd\\OneDrive\\Documents\\Projects\\ChiralWalkLink\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\3\\classes.dex
 path.2=3/classes.dex
 base.1=C\:\\Users\\luisd\\OneDrive\\Documents\\Projects\\ChiralWalkLink\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex

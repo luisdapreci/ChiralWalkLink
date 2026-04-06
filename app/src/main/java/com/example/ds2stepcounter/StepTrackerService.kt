@@ -36,21 +36,23 @@ class StepTrackerService : Service(), SensorEventListener {
 
     // ── Step detection pipeline constants ─────────────────────────────────────
     // Low-pass filter smoothing factor: 0 < alpha < 1
-    //   Lower  → smoother signal, better for slow walks, slightly more lag
-    //   Higher → noisier signal, faster response
-    private val FILTER_ALPHA = 0.15f
+    //   0.20 gives a good balance: smooth enough to kill noise, fast enough to
+    //   track the low-amplitude sinusoid of elliptical / in-place movement.
+    private val FILTER_ALPHA = 0.20f
 
     // Adaptive cooldown bounds (ms)
-    private val MIN_STEP_INTERVAL_MS = 250L   // ~4 steps/sec max (sprinting)
-    private val MAX_STEP_INTERVAL_MS = 1400L  // ~0.7 steps/sec min (very slow)
+    private val MIN_STEP_INTERVAL_MS = 220L   // ~4.5 steps/sec max (fast run in place)
+    private val MAX_STEP_INTERVAL_MS = 1400L  // ~0.7 steps/sec min (very slow walk)
 
-    // Sliding window for computing dynamic min/max of the filtered signal (ms)
-    private val DYNAMIC_WINDOW_MS = 2000L
+    // Sliding window for dynamic min/max (ms).
+    // 1500 ms adapts faster when the user switches pace while exercising in place.
+    private val DYNAMIC_WINDOW_MS = 1500L
 
     // Peak sensitivity: what fraction of the (max-min) range the signal must
     // exceed before being considered a candidate peak.
-    // Mapped from the user's sensitivity slider: MIN_PEAK_FACTOR = most sensitive.
-    private val MIN_PEAK_FACTOR = 0.22f
+    // MIN_PEAK_FACTOR = most sensitive (slider all the way left).
+    // Lowered to 0.18 so gentle elliptical oscillations are detectable.
+    private val MIN_PEAK_FACTOR = 0.18f
     private val MAX_PEAK_FACTOR = 0.72f
 
     // ── Step detection pipeline state ─────────────────────────────────────────
@@ -218,8 +220,7 @@ class StepTrackerService : Service(), SensorEventListener {
         val sliderNorm   = ((stepThreshold - 0.5f) / 4.0f).coerceIn(0f, 1f)
         val peakFactor   = MIN_PEAK_FACTOR + sliderNorm * (MAX_PEAK_FACTOR - MIN_PEAK_FACTOR)
         val armThreshold = dynMin + dynRange * peakFactor
-        // Reset line: signal must fall below this after a peak to re-enable detection
-        val resetLine    = dynMin + dynRange * (peakFactor * 0.5f)
+
 
         // ─── Stage 4: Hysteresis ARM → TRIGGER state machine ─────────────────
         val timeSinceLastStep = now - lastStepTime
@@ -228,8 +229,10 @@ class StepTrackerService : Service(), SensorEventListener {
         if (timeSinceLastStep >= MIN_STEP_INTERVAL_MS) {
 
             if (!isArmed) {
-                // Arm when signal rises above the dynamic threshold
-                if (filteredMagnitude > armThreshold && dynRange > 0.10f) {
+                // Arm when signal rises above the dynamic threshold.
+                // Guard lowered to 0.05 so elliptical's tiny-amplitude oscillations
+                // (where dynRange is naturally small) can still arm the detector.
+                if (filteredMagnitude > armThreshold && dynRange > 0.05f) {
                     isArmed   = true
                     peakValue = filteredMagnitude
                 }
@@ -237,7 +240,11 @@ class StepTrackerService : Service(), SensorEventListener {
                 // Track peak while armed
                 if (filteredMagnitude > peakValue) peakValue = filteredMagnitude
 
-                // Trigger (step!) when signal drops back below the reset line
+                // Trigger (step!) when signal drops back below the reset line.
+                // Reset line uses 0.40 × peakFactor (was 0.50) so the smooth,
+                // shallow valley of elliptical / in-place jogging actually
+                // crosses it and releases the trigger.
+                val resetLine = dynMin + dynRange * (peakFactor * 0.40f)
                 if (filteredMagnitude < resetLine) {
                     isArmed = false
 
