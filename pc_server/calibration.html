@@ -565,35 +565,14 @@
       </div>
     </div>
 
-    <!-- Manual step button (spacebar or click to simulate) -->
+    <!-- Controls -->
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-      <button class="btn" id="btn-step" title="Also works with SPACEBAR">
-        ⬇ TAP STEP (SPACE)
-      </button>
       <button class="btn btn-ghost" id="btn-reset">RESET</button>
       <button class="btn btn-ghost" id="btn-record">⏺ START RECORDING</button>
     </div>
   </div>
 
-  <!-- ── SENSITIVITY CALIBRATION ───────────────────────────── -->
-  <div class="sec-label">▸ SENSITIVITY CALIBRATION</div>
-  <div class="panel">
 
-    <div class="slider-row">
-      <div class="slider-meta">
-        <span class="slider-name">Acceleration Threshold</span>
-        <span class="slider-val-badge" id="sens-val-badge">3.0</span>
-      </div>
-      <div class="slider-desc">Minimum accelerometer spike (m/s²) to count as a step. Lower = more sensitive, higher = requires harder footfall.</div>
-      <input type="range" id="sens-slider" min="5" max="80" value="30" step="1" />
-    </div>
-
-    <!-- Sensitivity zone guide -->
-    <div style="display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);margin-top:-8px;padding:0 2px;">
-      <span>0.5 — Very sensitive</span>
-      <span>4.5 — Hard stomp only</span>
-    </div>
-  </div>
 
   <!-- ── SPEED MODE THRESHOLDS ─────────────────────────────── -->
   <div class="sec-label">▸ SPEED MODE THRESHOLDS</div>
@@ -644,13 +623,12 @@
 
 <script>
   /* ── State ───────────────────────────────────────────────── */
-  const DEFAULTS = { sens: 3.0, walk: 1.4, sprint: 2.2 };
+  const DEFAULTS = { walk: 1.4, sprint: 2.2 };
   const CADENCE_WINDOW_MS   = 3000;
   const CADENCE_WINDOW_SIZE = 6;
   const MAX_SPS_DISPLAY     = 4.5; // gauge max
   const WS_URL              = 'ws://localhost:5006';
 
-  let sensThreshold  = DEFAULTS.sens;
   let walkMaxSPS     = DEFAULTS.walk;
   let jogMaxSPS      = DEFAULTS.sprint;
 
@@ -675,23 +653,14 @@
   const toast         = document.getElementById('toast');
   const btnRecord     = document.getElementById('btn-record');
 
-  const sensSlider    = document.getElementById('sens-slider');
   const walkSlider    = document.getElementById('walk-slider');
   const sprintSlider  = document.getElementById('sprint-slider');
-  const sensValBadge  = document.getElementById('sens-val-badge');
   const walkValBadge  = document.getElementById('walk-val-badge');
   const sprintValBadge= document.getElementById('sprint-val-badge');
 
   /* ── Slider helpers ──────────────────────────────────────── */
-  function sliderToSens(v)   { return 0.5 + v / 10; }
   function sliderToSPS(v)    { return v / 10; }
 
-  function updateSensFromSlider() {
-    sensThreshold = sliderToSens(parseInt(sensSlider.value));
-    sensValBadge.textContent = sensThreshold.toFixed(1);
-    updateConfig();
-    savePrefs();
-  }
 
   function sendThresholdsToServer() {
     if (_ws && _ws.readyState === WebSocket.OPEN) {
@@ -733,7 +702,6 @@
     sendThresholdsToServer();
   }
 
-  sensSlider.addEventListener('input',   updateSensFromSlider);
   walkSlider.addEventListener('input',   updateWalkFromSlider);
   sprintSlider.addEventListener('input', updateSprintFromSlider);
 
@@ -844,19 +812,15 @@
   /* ── Config export ───────────────────────────────────────── */
   function updateConfig() {
     configOutput.innerHTML = `
-<span class="comment">// PC server.py — current threshold values (set live via calibration UI):</span>
+<span class="comment">// PC server.py — live threshold values:</span>
 <span class="key">WALK_MAX_SPS</span> = <span class="val">${walkMaxSPS.toFixed(1)}</span>   <span class="comment"># Walk → Jog boundary (steps/sec)</span>
 <span class="key">JOG_MAX_SPS</span>  = <span class="val">${jogMaxSPS.toFixed(1)}</span>   <span class="comment"># Jog → Sprint boundary (steps/sec)</span>
-
-<span class="comment">// Android app — sensitivity slider only:</span>
-<span class="key">step_threshold</span> = <span class="val">${sensThreshold.toFixed(1)}f</span>   <span class="comment">// Sensitivity (accelerometer spike m/s²)</span>
     `.trim();
   }
 
   /* ── Persist / load config ───────────────────────────────── */
   function savePrefs() {
     try {
-      localStorage.setItem('cwl_sens',   sensThreshold);
       localStorage.setItem('cwl_walk',   walkMaxSPS);
       localStorage.setItem('cwl_sprint', jogMaxSPS);
     } catch(e) {}
@@ -864,14 +828,11 @@
 
   function loadPrefs() {
     try {
-      const s = parseFloat(localStorage.getItem('cwl_sens'));
-      const w = parseFloat(localStorage.getItem('cwl_walk'));
-      const sp= parseFloat(localStorage.getItem('cwl_sprint'));
-      if (!isNaN(s))  { sensThreshold = s; sensSlider.value   = Math.round((s - 0.5) * 10); }
-      if (!isNaN(w))  { walkMaxSPS   = w; walkSlider.value   = Math.round(w * 10); }
-      if (!isNaN(sp)) { jogMaxSPS    = sp; sprintSlider.value = Math.round(sp * 10); }
+      const w  = parseFloat(localStorage.getItem('cwl_walk'));
+      const sp = parseFloat(localStorage.getItem('cwl_sprint'));
+      if (!isNaN(w))  { walkMaxSPS = w;  walkSlider.value   = Math.round(w * 10); }
+      if (!isNaN(sp)) { jogMaxSPS  = sp; sprintSlider.value = Math.round(sp * 10); }
     } catch(e) {}
-    sensValBadge.textContent   = sensThreshold.toFixed(1);
     walkValBadge.textContent   = walkMaxSPS.toFixed(1) + ' sps';
     sprintValBadge.textContent = jogMaxSPS.toFixed(1) + ' sps';
   }
@@ -898,14 +859,6 @@
   }
 
   /* ── Button bindings ──────────────────────────────────────── */
-  document.getElementById('btn-step').addEventListener('click', triggerStep);
-
-  document.addEventListener('keydown', e => {
-    if (e.code === 'Space' && e.target === document.body) {
-      e.preventDefault();
-      triggerStep();
-    }
-  });
 
   document.getElementById('btn-reset').addEventListener('click', () => {
     stepTimestamps = [];
@@ -948,25 +901,23 @@
   });
 
   document.getElementById('btn-copy').addEventListener('click', () => {
-    const text = `WALK_MAX_SPS = ${walkMaxSPS.toFixed(1)}\nJOG_MAX_SPS  = ${jogMaxSPS.toFixed(1)}\nstep_threshold = ${sensThreshold.toFixed(1)}`;
+    const text = `WALK_MAX_SPS = ${walkMaxSPS.toFixed(1)}\nJOG_MAX_SPS  = ${jogMaxSPS.toFixed(1)}`;
     navigator.clipboard.writeText(text).catch(() => {});
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 2200);
   });
 
   document.getElementById('btn-reset-defaults').addEventListener('click', () => {
-    sensThreshold = DEFAULTS.sens;
-    walkMaxSPS    = DEFAULTS.walk;
-    jogMaxSPS     = DEFAULTS.sprint;
-    sensSlider.value   = Math.round((sensThreshold - 0.5) * 10);
+    walkMaxSPS = DEFAULTS.walk;
+    jogMaxSPS  = DEFAULTS.sprint;
     walkSlider.value   = Math.round(walkMaxSPS * 10);
     sprintSlider.value = Math.round(jogMaxSPS * 10);
-    sensValBadge.textContent   = sensThreshold.toFixed(1);
     walkValBadge.textContent   = walkMaxSPS.toFixed(1) + ' sps';
     sprintValBadge.textContent = jogMaxSPS.toFixed(1) + ' sps';
     updateGaugeTicks();
     updateConfig();
     savePrefs();
+    sendThresholdsToServer();
   });
 
   /* ── Live link status helpers ───────────────────────── */
