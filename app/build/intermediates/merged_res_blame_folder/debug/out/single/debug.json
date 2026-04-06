@@ -1,26 +1,22 @@
 [
     {
-        "merged": "C:\\Users\\luisd\\.gradle\\daemon\\8.5\\com.example.ds2stepcounter.app-merged_res-31:\\drawable_ic_stat_walk.xml.flat",
-        "source": "C:\\Users\\luisd\\.gradle\\daemon\\8.5\\com.example.ds2stepcounter.app-main-33:\\drawable\\ic_stat_walk.xml"
-    },
-    {
-        "merged": "C:\\Users\\luisd\\.gradle\\daemon\\8.5\\com.example.ds2stepcounter.app-merged_res-31:\\layout_activity_main.xml.flat",
-        "source": "C:\\Users\\luisd\\.gradle\\daemon\\8.5\\com.example.ds2stepcounter.app-main-33:\\layout\\activity_main.xml"
-    },
-    {
-        "merged": "C:\\Users\\luisd\\.gradle\\daemon\\8.5\\com.example.ds2stepcounter.app-merged_res-31:\\drawable_btn_ds2_bg.xml.flat",
-        "source": "C:\\Users\\luisd\\.gradle\\daemon\\8.5\\com.example.ds2stepcounter.app-main-33:\\drawable\\btn_ds2_bg.xml"
+        "merged": "com.example.ds2stepcounter.app-merged_res-31:/drawable_ic_stat_walk.xml.flat",
+        "source": "com.example.ds2stepcounter.app-main-33:/drawable/ic_stat_walk.xml"
     },
     {
         "merged": "com.example.ds2stepcounter.app-merged_res-31:/layout_activity_main.xml.flat",
         "source": "com.example.ds2stepcounter.app-main-33:/layout/activity_main.xml"
     },
     {
-        "merged": "C:\\Users\\luisd\\.gradle\\daemon\\8.5\\com.example.ds2stepcounter.app-merged_res-31:\\drawable_edit_text_ds2_bg.xml.flat",
-        "source": "C:\\Users\\luisd\\.gradle\\daemon\\8.5\\com.example.ds2stepcounter.app-main-33:\\drawable\\edit_text_ds2_bg.xml"
+        "merged": "com.example.ds2stepcounter.app-merged_res-31:/drawable_btn_ds2_bg.xml.flat",
+        "source": "com.example.ds2stepcounter.app-main-33:/drawable/btn_ds2_bg.xml"
     },
     {
-        "merged": "C:\\Users\\luisd\\.gradle\\daemon\\8.5\\com.example.ds2stepcounter.app-merged_res-31:\\drawable_ic_launcher.png.flat",
-        "source": "C:\\Users\\luisd\\.gradle\\daemon\\8.5\\com.example.ds2stepcounter.app-main-33:\\drawable\\ic_launcher.png"
+        "merged": "com.example.ds2stepcounter.app-merged_res-31:/drawable_ic_launcher.png.flat",
+        "source": "com.example.ds2stepcounter.app-main-33:/drawable/ic_launcher.png"
+    },
+    {
+        "merged": "com.example.ds2stepcounter.app-merged_res-31:/drawable_edit_text_ds2_bg.xml.flat",
+        "source": "com.example.ds2stepcounter.app-main-33:/drawable/edit_text_ds2_bg.xml"
     }
 ]

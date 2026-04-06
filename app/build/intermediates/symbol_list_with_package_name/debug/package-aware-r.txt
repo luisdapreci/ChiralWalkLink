@@ -3365,6 +3365,8 @@ id spline
 id split_action_bar
 id spread
 id spread_inside
+id sprintThresholdLabel
+id sprintThresholdSlider
 id square
 id src_atop
 id src_in
@@ -3441,6 +3443,8 @@ id view_tree_saved_state_registry_owner
 id view_tree_view_model_store_owner
 id visible
 id visible_removing_fragment_view_tag
+id walkThresholdLabel
+id walkThresholdSlider
 id withText
 id with_icon
 id withinBounds

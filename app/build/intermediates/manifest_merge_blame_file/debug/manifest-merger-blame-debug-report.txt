@@ -9,27 +9,27 @@
 9        android:targetSdkVersion="34" />
 10
 11    <uses-permission android:name="android.permission.INTERNET" />
-11-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:5:5-67
-11-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:5:22-64
+11-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:5:5-67
+11-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:5:22-64
 12    <!-- Required for step counter on modern Android -->
 13    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
-13-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:7:5-79
-13-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:7:22-76
+13-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:7:5-79
+13-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:7:22-76
 14    <uses-permission android:name="android.permission.WAKE_LOCK" />
-14-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:8:5-68
-14-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:8:22-65
+14-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:8:5-68
+14-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:8:22-65
 15    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-15-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:9:5-77
-15-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:9:22-74
+15-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:9:5-77
+15-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:9:22-74
 16    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
-16-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:10:5-87
-16-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:10:22-84
+16-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:10:5-87
+16-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:10:22-84
 17    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-17-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:11:5-77
-17-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:11:22-74
+17-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:11:5-77
+17-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:11:22-74
 18    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
-18-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:12:5-85
-18-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:12:22-82
+18-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:12:5-85
+18-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:12:22-82
 19
 20    <permission
 20-->[androidx.core:core:1.12.0] C:\Users\luisd\.gradle\caches\transforms-3\440a64c1659b3784956be1ef27019da1\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
@@ -43,49 +43,49 @@
 24-->[androidx.core:core:1.12.0] C:\Users\luisd\.gradle\caches\transforms-3\440a64c1659b3784956be1ef27019da1\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
 25
 26    <application
-26-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:14:5-35:19
+26-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:14:5-35:19
 27        android:allowBackup="true"
-27-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:15:9-35
+27-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:15:9-35
 28        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
 28-->[androidx.core:core:1.12.0] C:\Users\luisd\.gradle\caches\transforms-3\440a64c1659b3784956be1ef27019da1\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
 29        android:debuggable="true"
 30        android:extractNativeLibs="false"
 31        android:icon="@drawable/ic_launcher"
-31-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:16:9-45
+31-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:16:9-45
 32        android:label="CHIRAL WALK LINK"
-32-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:18:9-41
+32-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:18:9-41
 33        android:roundIcon="@drawable/ic_launcher"
-33-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:17:9-50
+33-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:17:9-50
 34        android:supportsRtl="true"
-34-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:19:9-35
+34-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:19:9-35
 35        android:theme="@style/Theme.AppCompat.NoActionBar" >
-35-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:20:9-59
+35-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:20:9-59
 36        <activity
-36-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:21:9-28:20
+36-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:21:9-28:20
 37            android:name="com.example.ds2stepcounter.MainActivity"
-37-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:22:13-41
+37-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:22:13-41
 38            android:exported="true" >
-38-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:23:13-36
+38-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:23:13-36
 39            <intent-filter>
-39-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:24:13-27:29
+39-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:24:13-27:29
 40                <action android:name="android.intent.action.MAIN" />
-40-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:25:17-69
-40-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:25:25-66
+40-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:25:17-69
+40-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:25:25-66
 41
 42                <category android:name="android.intent.category.LAUNCHER" />
-42-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:26:17-77
-42-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:26:27-74
+42-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:26:17-77
+42-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:26:27-74
 43            </intent-filter>
 44        </activity>
 45
 46        <service
-46-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:30:9-34:19
+46-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:30:9-34:19
 47            android:name="com.example.ds2stepcounter.StepTrackerService"
-47-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:31:13-47
+47-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:31:13-47
 48            android:exported="false"
-48-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:32:13-37
+48-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:32:13-37
 49            android:foregroundServiceType="dataSync" >
-49-->C:\Users\luisd\OneDrive\Documents\Projects\DeathStandingAndroid\app\src\main\AndroidManifest.xml:33:13-53
+49-->C:\Users\luisd\OneDrive\Documents\Projects\ChiralWalkLink\app\src\main\AndroidManifest.xml:33:13-53
 50        </service>
 51
 52        <provider
