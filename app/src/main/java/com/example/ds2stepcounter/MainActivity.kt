@@ -23,15 +23,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var stepCountText: TextView
     private lateinit var sensitivitySlider: SeekBar
     private lateinit var sensitivityLabel: TextView
-    private lateinit var walkThresholdSlider: SeekBar
-    private lateinit var walkThresholdLabel: TextView
-    private lateinit var sprintThresholdSlider: SeekBar
-    private lateinit var sprintThresholdLabel: TextView
 
     private var isTracking = false
     private var stepThreshold = 3.0f
-    private var walkThreshold = 1.4f    // steps/sec — Walk → Jog boundary
-    private var sprintThreshold = 2.2f  // steps/sec — Jog → Sprint boundary
 
     private val PERMISSION_REQUEST_CODE = 100
 
@@ -69,10 +63,6 @@ class MainActivity : AppCompatActivity() {
         stepCountText = findViewById(R.id.stepCountText)
         sensitivitySlider = findViewById(R.id.sensitivitySlider)
         sensitivityLabel = findViewById(R.id.sensitivityLabel)
-        walkThresholdSlider = findViewById(R.id.walkThresholdSlider)
-        walkThresholdLabel = findViewById(R.id.walkThresholdLabel)
-        sprintThresholdSlider = findViewById(R.id.sprintThresholdSlider)
-        sprintThresholdLabel = findViewById(R.id.sprintThresholdLabel)
 
         val ds2Prefs = getSharedPreferences("ds2_prefs", Context.MODE_PRIVATE)
         val savedIp = ds2Prefs.getString("last_ip", "")
@@ -80,17 +70,10 @@ class MainActivity : AppCompatActivity() {
             ipAddressInput.setText(savedIp)
         }
 
-        // Restore saved threshold values
-        stepThreshold   = ds2Prefs.getFloat("step_threshold",   3.0f)
+        // Restore saved sensitivity value
+        stepThreshold = ds2Prefs.getFloat("step_threshold", 3.0f)
         sensitivitySlider.progress = ((stepThreshold - 0.5f) * 10).toInt()
         sensitivityLabel.text = "Sensitivity Threshold: %.1f".format(stepThreshold)
-
-        walkThreshold   = ds2Prefs.getFloat("walk_threshold",   1.4f)
-        sprintThreshold = ds2Prefs.getFloat("sprint_threshold", 2.2f)
-        walkThresholdSlider.progress   = (walkThreshold   * 10).toInt()
-        sprintThresholdSlider.progress = (sprintThreshold * 10).toInt()
-        walkThresholdLabel.text   = "Walk → Jog: %.1f steps/sec".format(walkThreshold)
-        sprintThresholdLabel.text = "Jog → Sprint: %.1f steps/sec".format(sprintThreshold)
 
         toggleButton.setOnClickListener {
             if (isTracking) stopTracking() else startTracking()
@@ -104,34 +87,6 @@ class MainActivity : AppCompatActivity() {
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 ds2Prefs.edit().putFloat("step_threshold", stepThreshold).apply()
-            }
-        })
-
-        // Walk → Jog threshold slider (0.5 – 4.5 steps/sec, progress 5–45 → /10)
-        walkThresholdSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                val value = (progress.coerceAtLeast(5)) / 10.0f   // min 0.5
-                // Clamp: walk must stay below sprint
-                walkThreshold = value.coerceAtMost(sprintThreshold - 0.1f)
-                walkThresholdLabel.text = "Walk → Jog: %.1f steps/sec".format(walkThreshold)
-            }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                ds2Prefs.edit().putFloat("walk_threshold", walkThreshold).apply()
-            }
-        })
-
-        // Jog → Sprint threshold slider (0.5 – 4.5 steps/sec)
-        sprintThresholdSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                val value = (progress.coerceAtLeast(5)) / 10.0f
-                // Clamp: sprint must stay above walk
-                sprintThreshold = value.coerceAtLeast(walkThreshold + 0.1f)
-                sprintThresholdLabel.text = "Jog → Sprint: %.1f steps/sec".format(sprintThreshold)
-            }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                ds2Prefs.edit().putFloat("sprint_threshold", sprintThreshold).apply()
             }
         })
 
@@ -219,8 +174,6 @@ class MainActivity : AppCompatActivity() {
             action = StepTrackerService.ACTION_START
             putExtra(StepTrackerService.EXTRA_IP, ipStr)
             putExtra(StepTrackerService.EXTRA_THRESHOLD, stepThreshold)
-            putExtra(StepTrackerService.EXTRA_WALK_THRESHOLD,   walkThreshold)
-            putExtra(StepTrackerService.EXTRA_SPRINT_THRESHOLD, sprintThreshold)
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

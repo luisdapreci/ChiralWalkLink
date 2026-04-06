@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CHIRAL WALK LINK — Calibration Terminal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cyan:      #00e5ff;
+      --cyan-dim:  #007a9b;
+      --cyan-glow: rgba(0,229,255,0.18);
+      --cyan-faint:rgba(0,229,255,0.06);
+      --bg:        #060d14;
+      --panel:     #0a1622;
+      --border:    rgba(0,229,255,0.15);
+      --text:      #a0c8e8;
+      --text-dim:  #3a5a70;
+      --walk-col:  #3dd6f5;
+      --jog-col:   #00e5ff;
+      --sprint-col:#ff6b81;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── Scanlines overlay ─────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── Layout ────────────────────────────────────────────────── */
+    .app {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+    }
+
+    /* ── Header ────────────────────────────────────────────────── */
+    .header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+      margin-bottom: 28px;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+    .logo-dot {
+      width: 8px; height: 8px;
+      background: var(--cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--cyan);
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; box-shadow: 0 0 8px var(--cyan); }
+      50%      { opacity: 0.4; box-shadow: 0 0 3px var(--cyan); }
+    }
+    .header-eyebrow {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      color: var(--cyan-dim);
+      text-transform: uppercase;
+    }
+    .header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #fff;
+      text-transform: uppercase;
+    }
+    .header h1 span { color: var(--cyan); }
+    .header-sub {
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    /* ── Section label ─────────────────────────────────────────── */
+    .sec-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sec-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Panel / Card ──────────────────────────────────────────── */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--cyan) 0%, transparent 80%);
+      opacity: 0.6;
+    }
+
+    /* ── Mode Display ─────────────────────────────────────────── */
+    .mode-display {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .mode-card {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 18px 16px;
+      text-align: center;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .mode-card.active-walk {
+      border-color: var(--walk-col);
+      background: rgba(61,214,245,0.08);
+      box-shadow: 0 0 20px rgba(61,214,245,0.2), inset 0 0 30px rgba(61,214,245,0.05);
+    }
+    .mode-card.active-jog {
+      border-color: var(--jog-col);
+      background: rgba(0,229,255,0.08);
+      box-shadow: 0 0 20px rgba(0,229,255,0.25), inset 0 0 30px rgba(0,229,255,0.07);
+    }
+    .mode-card.active-sprint {
+      border-color: var(--sprint-col);
+      background: rgba(255,107,129,0.08);
+      box-shadow: 0 0 20px rgba(255,107,129,0.25), inset 0 0 30px rgba(255,107,129,0.07);
+    }
+    .mode-icon {
+      font-size: 28px;
+      margin-bottom: 6px;
+      display: block;
+      filter: grayscale(1) opacity(0.3);
+      transition: filter 0.25s;
+    }
+    .mode-card.active-walk .mode-icon,
+    .mode-card.active-jog  .mode-icon,
+    .mode-card.active-sprint .mode-icon { filter: none; }
+
+    .mode-name {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      transition: color 0.25s;
+    }
+    .mode-card.active-walk   .mode-name { color: var(--walk-col); }
+    .mode-card.active-jog    .mode-name { color: var(--jog-col); }
+    .mode-card.active-sprint .mode-name { color: var(--sprint-col); }
+
+    .mode-keybind {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Cadence gauge ────────────────────────────────────────── */
+    .gauge-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .gauge-label-col { min-width: 110px; }
+    .gauge-val {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 28px;
+      color: var(--cyan);
+      line-height: 1;
+    }
+    .gauge-unit {
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      margin-top: 2px;
+    }
+    .gauge-bar-wrap {
+      flex: 1;
+      height: 28px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+    .gauge-bar-fill {
+      height: 100%;
+      width: 0%;
+      transition: width 0.15s ease, background 0.3s;
+      background: linear-gradient(90deg, var(--cyan-dim), var(--cyan));
+      position: relative;
+    }
+    .gauge-bar-fill.mode-sprint {
+      background: linear-gradient(90deg, #c0293a, var(--sprint-col));
+    }
+    .gauge-bar-fill.mode-walk {
+      background: linear-gradient(90deg, #1a5a6b, var(--walk-col));
+    }
+    /* Threshold tick marks */
+    .tick {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 2px;
+      background: rgba(255,255,255,0.5);
+      pointer-events: none;
+    }
+    .tick-label {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: rgba(255,255,255,0.5);
+      white-space: nowrap;
+      left: 4px;
+    }
+
+    /* ── Step flash ring ─────────────────────────────────────── */
+    .step-flash-ring {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: border-color 0.1s;
+    }
+    .step-flash-ring.flash {
+      border-color: var(--cyan);
+      box-shadow: 0 0 14px var(--cyan);
+    }
+    .step-flash-ring .step-num {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 16px;
+      color: var(--cyan);
+    }
+
+    /* ── Slider control ───────────────────────────────────────── */
+    .slider-row {
+      margin-bottom: 20px;
+    }
+    .slider-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+    .slider-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .slider-val-badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      color: var(--cyan);
+      background: rgba(0,229,255,0.1);
+      border: 1px solid rgba(0,229,255,0.25);
+      padding: 2px 10px;
+      border-radius: 2px;
+    }
+    .slider-desc {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(0,229,255,0.12);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px rgba(0,229,255,0.7);
+      cursor: pointer;
+      transition: box-shadow 0.15s;
+    }
+    input[type=range]:hover::-webkit-slider-thumb {
+      box-shadow: 0 0 14px rgba(0,229,255,1);
+    }
+    input[type=range].sprint-slider::-webkit-slider-thumb {
+      background: var(--sprint-col);
+      box-shadow: 0 0 8px rgba(255,107,129,0.7);
+    }
+    input[type=range].walk-slider::-webkit-slider-thumb {
+      background: var(--walk-col);
+      box-shadow: 0 0 8px rgba(61,214,245,0.7);
+    }
+
+    /* ── Step log ─────────────────────────────────────────────── */
+    .log-area {
+      height: 120px;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 8px 12px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .log-area::-webkit-scrollbar { width: 4px; }
+    .log-area::-webkit-scrollbar-track { background: transparent; }
+    .log-area::-webkit-scrollbar-thumb { background: var(--border); }
+    .log-entry { line-height: 1.8; }
+    .log-entry.walk   { color: var(--walk-col); }
+    .log-entry.jog    { color: var(--jog-col); }
+    .log-entry.sprint { color: var(--sprint-col); }
+
+    /* ── Config output ────────────────────────────────────────── */
+    .config-box {
+      background: rgba(0,0,0,0.6);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 14px 16px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      line-height: 1.9;
+      color: var(--text-dim);
+    }
+    .config-box .key   { color: var(--cyan); }
+    .config-box .val   { color: #ffffff; }
+    .config-box .comment { color: var(--text-dim); }
+
+    /* ── Buttons ──────────────────────────────────────────────── */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .btn {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 10px 22px;
+      border: 1px solid var(--cyan);
+      border-radius: 2px;
+      background: transparent;
+      color: var(--cyan);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: rgba(0,229,255,0.12);
+      box-shadow: 0 0 12px rgba(0,229,255,0.3);
+    }
+    .btn.btn-ghost {
+      border-color: var(--border);
+      color: var(--text-dim);
+    }
+    .btn.btn-ghost:hover {
+      border-color: var(--text-dim);
+      background: rgba(255,255,255,0.04);
+    }
+    .btn.active-rec {
+      border-color: var(--sprint-col);
+      color: var(--sprint-col);
+      animation: rec-blink 1s ease-in-out infinite;
+    }
+    @keyframes rec-blink {
+      0%,100% { box-shadow: 0 0 8px rgba(255,107,129,0.5); }
+      50%      { box-shadow: 0 0 2px rgba(255,107,129,0.1); }
+    }
+
+    /* ── Copy toast ───────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: var(--panel);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      padding: 10px 24px;
+      border-radius: 2px;
+      box-shadow: 0 0 20px rgba(0,229,255,0.3);
+      transition: transform 0.3s ease;
+      z-index: 9998;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── Live link status bar ────────────────────────────────── */
+    .live-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      margin-bottom: 20px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+    }
+    .live-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      flex-shrink: 0;
+      transition: background 0.4s, box-shadow 0.4s;
+    }
+    .live-dot.live {
+      background: #39ff5a;
+      box-shadow: 0 0 8px #39ff5a;
+      animation: live-pulse 1.4s ease-in-out infinite;
+    }
+    .live-dot.trying {
+      background: #ffaa00;
+      box-shadow: 0 0 6px #ffaa00;
+    }
+    @keyframes live-pulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.5; }
+    }
+    .live-status {
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      transition: color 0.3s;
+      flex: 1;
+    }
+    .live-status.live   { color: #39ff5a; }
+    .live-status.trying { color: #ffaa00; }
+    .live-source-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 2px;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+    }
+    .live-source-badge.live {
+      border-color: rgba(57,255,90,0.4);
+      color: #39ff5a;
+      background: rgba(57,255,90,0.07);
+    }
+
+    /* ── Responsive ───────────────────────────────────────────── */
+    @media (max-width: 560px) {
+      .mode-display { grid-template-columns: 1fr; }
+      .gauge-label-col { min-width: 80px; }
+      .gauge-val { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── HEADER ─────────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-top">
+      <div class="logo-dot"></div>
+      <span class="header-eyebrow">DRAWBRIDGE TERMINAL v2 · CALIBRATION MODULE</span>
+    </div>
+    <h1>CHIRAL <span>WALK</span> LINK</h1>
+    <div class="header-sub">SENSITIVITY &amp; SPEED-MODE CALIBRATION INTERFACE</div>
+  </header>
+
+  <!-- ── LIVE LINK STATUS ─────────────────────────────────── -->
+  <div class="live-bar" id="live-bar">
+    <div class="live-dot" id="live-dot"></div>
+    <span class="live-status" id="live-status">CONNECTING TO DRAWBRIDGE SERVER...</span>
+    <span class="live-source-badge" id="live-source-badge">MANUAL MODE</span>
+  </div>
+
+  <!-- ── LIVE CADENCE MONITOR ──────────────────────────────── -->
+  <div class="sec-label">▸ LIVE CADENCE MONITOR</div>
+  <div class="panel">
+
+    <!-- Mode cards -->
+    <div class="mode-display">
+      <div class="mode-card" id="card-walk">
+        <span class="mode-icon">🚶</span>
+        <div class="mode-name">Walk</div>
+        <div class="mode-keybind">W + L CTRL</div>
+      </div>
+      <div class="mode-card" id="card-jog">
+        <span class="mode-icon">🏃</span>
+        <div class="mode-name">Jog</div>
+        <div class="mode-keybind">W ONLY</div>
+      </div>
+      <div class="mode-card" id="card-sprint">
+        <span class="mode-icon">⚡</span>
+        <div class="mode-name">Sprint</div>
+        <div class="mode-keybind">W + L SHIFT</div>
+      </div>
+    </div>
+
+    <!-- Cadence gauge -->
+    <div class="gauge-row">
+      <div class="gauge-label-col">
+        <div class="gauge-val" id="cadence-val">0.00</div>
+        <div class="gauge-unit">STEPS / SEC</div>
+      </div>
+      <div class="gauge-bar-wrap" id="gauge-wrap">
+        <div class="gauge-bar-fill" id="gauge-fill"></div>
+        <!-- threshold ticks injected by JS -->
+      </div>
+      <div class="step-flash-ring" id="flash-ring">
+        <span class="step-num" id="step-count-live">0</span>
+      </div>
+    </div>
+
+    <!-- Manual step button (spacebar or click to simulate) -->
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <button class="btn" id="btn-step" title="Also works with SPACEBAR">
+        ⬇ TAP STEP (SPACE)
+      </button>
+      <button class="btn btn-ghost" id="btn-reset">RESET</button>
+      <button class="btn btn-ghost" id="btn-record">⏺ START RECORDING</button>
+    </div>
+  </div>
+
+  <!-- ── SENSITIVITY CALIBRATION ───────────────────────────── -->
+  <div class="sec-label">▸ SENSITIVITY CALIBRATION</div>
+  <div class="panel">
+
+    <div class="slider-row">
+      <div class="slider-meta">
+        <span class="slider-name">Acceleration Threshold</span>
+        <span class="slider-val-badge" id="sens-val-badge">3.0</span>
+      </div>
+      <div class="slider-desc">Minimum accelerometer spike (m/s²) to count as a step. Lower = more sensitive, higher = requires harder footfall.</div>
+      <input type="range" id="sens-slider" min="5" max="80" value="30" step="1" />
+    </div>
+
+    <!-- Sensitivity zone guide -->
+    <div style="display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);margin-top:-8px;padding:0 2px;">
+      <span>0.5 — Very sensitive</span>
+      <span>4.5 — Hard stomp only</span>
+    </div>
+  </div>
+
+  <!-- ── SPEED MODE THRESHOLDS ─────────────────────────────── -->
+  <div class="sec-label">▸ SPEED MODE THRESHOLDS</div>
+  <div class="panel">
+
+    <!-- Walk → Jog -->
+    <div class="slider-row">
+      <div class="slider-meta">
+        <span class="slider-name" style="color:var(--walk-col);">Walk → Jog Boundary</span>
+        <span class="slider-val-badge" id="walk-val-badge" style="color:var(--walk-col);border-color:rgba(61,214,245,0.35);">1.4 sps</span>
+      </div>
+      <div class="slider-desc">Below this cadence → WALK mode (W + LCtrl). Above → JOG mode (W only).</div>
+      <input type="range" class="walk-slider" id="walk-slider" min="5" max="45" value="14" step="1" />
+    </div>
+
+    <!-- Jog → Sprint -->
+    <div class="slider-row" style="margin-bottom:0">
+      <div class="slider-meta">
+        <span class="slider-name" style="color:var(--sprint-col);">Jog → Sprint Boundary</span>
+        <span class="slider-val-badge" id="sprint-val-badge" style="color:var(--sprint-col);border-color:rgba(255,107,129,0.35);">2.2 sps</span>
+      </div>
+      <div class="slider-desc">Above this cadence → SPRINT mode (W + LShift). Below → JOG mode (W only).</div>
+      <input type="range" class="sprint-slider" id="sprint-slider" min="5" max="45" value="22" step="1" />
+    </div>
+  </div>
+
+  <!-- ── RECORDING LOG ──────────────────────────────────────── -->
+  <div class="sec-label">▸ CADENCE LOG</div>
+  <div class="panel">
+    <div class="log-area" id="log-area">
+      <div class="log-entry" style="color:var(--text-dim);">[INIT] Calibration terminal ready. Press SPACE or tap the button to simulate steps.</div>
+    </div>
+  </div>
+
+  <!-- ── CONFIG OUTPUT ──────────────────────────────────────── -->
+  <div class="sec-label">▸ ANDROID CONFIG EXPORT</div>
+  <div class="panel">
+    <div class="config-box" id="config-output"></div>
+    <div class="btn-row">
+      <button class="btn" id="btn-copy">⧉ COPY VALUES</button>
+      <button class="btn btn-ghost" id="btn-reset-defaults">RESTORE DEFAULTS</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">Values copied to clipboard!</div>
+
+<script>
+  /* ── State ───────────────────────────────────────────────── */
+  const DEFAULTS = { sens: 3.0, walk: 1.4, sprint: 2.2 };
+  const CADENCE_WINDOW_MS   = 3000;
+  const CADENCE_WINDOW_SIZE = 6;
+  const MAX_SPS_DISPLAY     = 4.5; // gauge max
+  const WS_URL              = 'ws://localhost:5006';
+
+  let sensThreshold  = DEFAULTS.sens;
+  let walkMaxSPS     = DEFAULTS.walk;
+  let jogMaxSPS      = DEFAULTS.sprint;
+
+  let stepTimestamps = [];
+  let totalSteps     = 0;
+  let lastCadence    = 0;
+  let currentMode    = 'idle';
+
+  let isRecording    = false;
+  let recordingData  = [];
+
+  let liveConnected  = false;   // true when WS link is up
+
+  /* ── DOM refs ────────────────────────────────────────────── */
+  const cadenceVal    = document.getElementById('cadence-val');
+  const gaugeFill     = document.getElementById('gauge-fill');
+  const gaugeWrap     = document.getElementById('gauge-wrap');
+  const flashRing     = document.getElementById('flash-ring');
+  const stepCountLive = document.getElementById('step-count-live');
+  const logArea       = document.getElementById('log-area');
+  const configOutput  = document.getElementById('config-output');
+  const toast         = document.getElementById('toast');
+  const btnRecord     = document.getElementById('btn-record');
+
+  const sensSlider    = document.getElementById('sens-slider');
+  const walkSlider    = document.getElementById('walk-slider');
+  const sprintSlider  = document.getElementById('sprint-slider');
+  const sensValBadge  = document.getElementById('sens-val-badge');
+  const walkValBadge  = document.getElementById('walk-val-badge');
+  const sprintValBadge= document.getElementById('sprint-val-badge');
+
+  /* ── Slider helpers ──────────────────────────────────────── */
+  function sliderToSens(v)   { return 0.5 + v / 10; }
+  function sliderToSPS(v)    { return v / 10; }
+
+  function updateSensFromSlider() {
+    sensThreshold = sliderToSens(parseInt(sensSlider.value));
+    sensValBadge.textContent = sensThreshold.toFixed(1);
+    updateConfig();
+    savePrefs();
+  }
+
+  function sendThresholdsToServer() {
+    if (_ws && _ws.readyState === WebSocket.OPEN) {
+      _ws.send(JSON.stringify({
+        event:  'set_thresholds',
+        walk:   walkMaxSPS,
+        sprint: jogMaxSPS
+      }));
+    }
+  }
+
+  function updateWalkFromSlider() {
+    let v = sliderToSPS(parseInt(walkSlider.value));
+    // clamp below sprint
+    if (v >= jogMaxSPS) {
+      v = jogMaxSPS - 0.1;
+      walkSlider.value = Math.round(v * 10);
+    }
+    walkMaxSPS = parseFloat(v.toFixed(1));
+    walkValBadge.textContent = walkMaxSPS.toFixed(1) + ' sps';
+    updateGaugeTicks();
+    updateConfig();
+    savePrefs();
+    sendThresholdsToServer();
+  }
+
+  function updateSprintFromSlider() {
+    let v = sliderToSPS(parseInt(sprintSlider.value));
+    // clamp above walk
+    if (v <= walkMaxSPS) {
+      v = walkMaxSPS + 0.1;
+      sprintSlider.value = Math.round(v * 10);
+    }
+    jogMaxSPS = parseFloat(v.toFixed(1));
+    sprintValBadge.textContent = jogMaxSPS.toFixed(1) + ' sps';
+    updateGaugeTicks();
+    updateConfig();
+    savePrefs();
+    sendThresholdsToServer();
+  }
+
+  sensSlider.addEventListener('input',   updateSensFromSlider);
+  walkSlider.addEventListener('input',   updateWalkFromSlider);
+  sprintSlider.addEventListener('input', updateSprintFromSlider);
+
+  /* ── Gauge tick marks ─────────────────────────────────────── */
+  function updateGaugeTicks() {
+    // Remove existing ticks
+    gaugeWrap.querySelectorAll('.tick,.tick-label').forEach(e => e.remove());
+
+    const walkPct   = (walkMaxSPS / MAX_SPS_DISPLAY) * 100;
+    const sprintPct = (jogMaxSPS  / MAX_SPS_DISPLAY) * 100;
+
+    [
+      { pct: walkPct,   label: `W▸J ${walkMaxSPS.toFixed(1)}`,   color: 'rgba(61,214,245,0.7)' },
+      { pct: sprintPct, label: `J▸S ${jogMaxSPS.toFixed(1)}`,    color: 'rgba(255,107,129,0.7)' },
+    ].forEach(t => {
+      const tick = document.createElement('div');
+      tick.className = 'tick';
+      tick.style.left = t.pct + '%';
+      tick.style.background = t.color;
+      gaugeWrap.appendChild(tick);
+
+      const lbl = document.createElement('div');
+      lbl.className = 'tick-label';
+      lbl.style.left = (t.pct + 1) + '%';
+      lbl.style.color = t.color;
+      lbl.textContent = t.label;
+      gaugeWrap.appendChild(lbl);
+    });
+  }
+
+  /* ── Classify mode ───────────────────────────────────────── */
+  function classifyMode(sps) {
+    if (sps <= 0)            return 'idle';
+    if (sps < walkMaxSPS)    return 'walk';
+    if (sps < jogMaxSPS)     return 'jog';
+    return 'sprint';
+  }
+
+  /* ── Register a step ─────────────────────────────────────── */
+  function registerStep() {
+    const now = Date.now();
+    stepTimestamps.push(now);
+
+    // Prune outside window
+    while (stepTimestamps.length && now - stepTimestamps[0] > CADENCE_WINDOW_MS)
+      stepTimestamps.shift();
+    while (stepTimestamps.length > CADENCE_WINDOW_SIZE)
+      stepTimestamps.shift();
+
+    totalSteps++;
+    stepCountLive.textContent = totalSteps;
+
+    // Flash ring
+    flashRing.classList.add('flash');
+    setTimeout(() => flashRing.classList.remove('flash'), 120);
+
+    // Compute cadence
+    let sps = 0;
+    if (stepTimestamps.length >= 2) {
+      const span = stepTimestamps[stepTimestamps.length - 1] - stepTimestamps[0];
+      if (span > 0) sps = (stepTimestamps.length - 1) * 1000 / span;
+    }
+    lastCadence = sps;
+
+    const mode = classifyMode(sps);
+    currentMode = mode;
+    updateModeCards(mode);
+    updateGauge(sps, mode);
+    addLogEntry(sps, mode);
+
+    if (isRecording) {
+      recordingData.push({ time: now, sps: parseFloat(sps.toFixed(2)), mode });
+    }
+  }
+
+  /* ── Gauge update ────────────────────────────────────────── */
+  function updateGauge(sps, mode) {
+    cadenceVal.textContent = sps.toFixed(2);
+    const pct = Math.min((sps / MAX_SPS_DISPLAY) * 100, 100);
+    gaugeFill.style.width = pct + '%';
+    gaugeFill.className = 'gauge-bar-fill';
+    if (mode === 'walk')   gaugeFill.classList.add('mode-walk');
+    if (mode === 'sprint') gaugeFill.classList.add('mode-sprint');
+  }
+
+  /* ── Mode card highlight ─────────────────────────────────── */
+  function updateModeCards(mode) {
+    ['walk','jog','sprint'].forEach(m => {
+      document.getElementById('card-' + m).className = 'mode-card';
+    });
+    if (mode !== 'idle') {
+      document.getElementById('card-' + mode).classList.add('active-' + mode);
+    }
+  }
+
+  /* ── Log ──────────────────────────────────────────────────── */
+  function addLogEntry(sps, mode) {
+    const ts = new Date().toISOString().slice(11,23);
+    const line = document.createElement('div');
+    line.className = 'log-entry ' + (mode === 'idle' ? '' : mode);
+    line.textContent = `[${ts}]  ${sps.toFixed(2)} sps  →  ${mode.toUpperCase()}`;
+    logArea.appendChild(line);
+    logArea.scrollTop = logArea.scrollHeight;
+    // Trim log
+    while (logArea.children.length > 80) logArea.removeChild(logArea.firstChild);
+  }
+
+  /* ── Config export ───────────────────────────────────────── */
+  function updateConfig() {
+    configOutput.innerHTML = `
+<span class="comment">// PC server.py — current threshold values (set live via calibration UI):</span>
+<span class="key">WALK_MAX_SPS</span> = <span class="val">${walkMaxSPS.toFixed(1)}</span>   <span class="comment"># Walk → Jog boundary (steps/sec)</span>
+<span class="key">JOG_MAX_SPS</span>  = <span class="val">${jogMaxSPS.toFixed(1)}</span>   <span class="comment"># Jog → Sprint boundary (steps/sec)</span>
+
+<span class="comment">// Android app — sensitivity slider only:</span>
+<span class="key">step_threshold</span> = <span class="val">${sensThreshold.toFixed(1)}f</span>   <span class="comment">// Sensitivity (accelerometer spike m/s²)</span>
+    `.trim();
+  }
+
+  /* ── Persist / load config ───────────────────────────────── */
+  function savePrefs() {
+    try {
+      localStorage.setItem('cwl_sens',   sensThreshold);
+      localStorage.setItem('cwl_walk',   walkMaxSPS);
+      localStorage.setItem('cwl_sprint', jogMaxSPS);
+    } catch(e) {}
+  }
+
+  function loadPrefs() {
+    try {
+      const s = parseFloat(localStorage.getItem('cwl_sens'));
+      const w = parseFloat(localStorage.getItem('cwl_walk'));
+      const sp= parseFloat(localStorage.getItem('cwl_sprint'));
+      if (!isNaN(s))  { sensThreshold = s; sensSlider.value   = Math.round((s - 0.5) * 10); }
+      if (!isNaN(w))  { walkMaxSPS   = w; walkSlider.value   = Math.round(w * 10); }
+      if (!isNaN(sp)) { jogMaxSPS    = sp; sprintSlider.value = Math.round(sp * 10); }
+    } catch(e) {}
+    sensValBadge.textContent   = sensThreshold.toFixed(1);
+    walkValBadge.textContent   = walkMaxSPS.toFixed(1) + ' sps';
+    sprintValBadge.textContent = jogMaxSPS.toFixed(1) + ' sps';
+  }
+
+  /* ── Cadence decay (if no steps for 0.8s, fade gauge) ───── */
+  let decayTimer = null;
+  function scheduleDecay() {
+    clearTimeout(decayTimer);
+    decayTimer = setTimeout(() => {
+      // Smoothly decay cadence display
+      lastCadence = 0;
+      cadenceVal.textContent = '0.00';
+      gaugeFill.style.width = '0%';
+      gaugeFill.className = 'gauge-bar-fill';
+      currentMode = 'idle';
+      updateModeCards('idle');
+    }, 900);
+  }
+
+  /* ── Step trigger ────────────────────────────────────────── */
+  function triggerStep() {
+    registerStep();
+    scheduleDecay();
+  }
+
+  /* ── Button bindings ──────────────────────────────────────── */
+  document.getElementById('btn-step').addEventListener('click', triggerStep);
+
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space' && e.target === document.body) {
+      e.preventDefault();
+      triggerStep();
+    }
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    stepTimestamps = [];
+    totalSteps = 0;
+    lastCadence = 0;
+    currentMode = 'idle';
+    stepCountLive.textContent = '0';
+    cadenceVal.textContent = '0.00';
+    gaugeFill.style.width = '0%';
+    gaugeFill.className = 'gauge-bar-fill';
+    updateModeCards('idle');
+    logArea.innerHTML = '<div class="log-entry" style="color:var(--text-dim);">[RESET] Session cleared.</div>';
+    clearTimeout(decayTimer);
+  });
+
+  btnRecord.addEventListener('click', () => {
+    isRecording = !isRecording;
+    if (isRecording) {
+      recordingData = [];
+      btnRecord.textContent = '⏹ STOP RECORDING';
+      btnRecord.classList.add('active-rec');
+    } else {
+      btnRecord.textContent = '⏺ START RECORDING';
+      btnRecord.classList.remove('active-rec');
+      // Dump summary to log
+      if (recordingData.length > 1) {
+        const modes = recordingData.map(d => d.mode);
+        const modesCount = { walk: 0, jog: 0, sprint: 0, idle: 0 };
+        modes.forEach(m => modesCount[m]++);
+        const maxSps = Math.max(...recordingData.map(d => d.sps)).toFixed(2);
+        const avgSps = (recordingData.reduce((a,d) => a + d.sps, 0) / recordingData.length).toFixed(2);
+        const line = document.createElement('div');
+        line.className = 'log-entry jog';
+        line.textContent = `[REC SUMMARY]  ${recordingData.length} steps  |  avg ${avgSps} sps  max ${maxSps} sps  |  W:${modesCount.walk} J:${modesCount.jog} S:${modesCount.sprint}`;
+        logArea.appendChild(line);
+        logArea.scrollTop = logArea.scrollHeight;
+      }
+      recordingData = [];
+    }
+  });
+
+  document.getElementById('btn-copy').addEventListener('click', () => {
+    const text = `WALK_MAX_SPS = ${walkMaxSPS.toFixed(1)}\nJOG_MAX_SPS  = ${jogMaxSPS.toFixed(1)}\nstep_threshold = ${sensThreshold.toFixed(1)}`;
+    navigator.clipboard.writeText(text).catch(() => {});
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  });
+
+  document.getElementById('btn-reset-defaults').addEventListener('click', () => {
+    sensThreshold = DEFAULTS.sens;
+    walkMaxSPS    = DEFAULTS.walk;
+    jogMaxSPS     = DEFAULTS.sprint;
+    sensSlider.value   = Math.round((sensThreshold - 0.5) * 10);
+    walkSlider.value   = Math.round(walkMaxSPS * 10);
+    sprintSlider.value = Math.round(jogMaxSPS * 10);
+    sensValBadge.textContent   = sensThreshold.toFixed(1);
+    walkValBadge.textContent   = walkMaxSPS.toFixed(1) + ' sps';
+    sprintValBadge.textContent = jogMaxSPS.toFixed(1) + ' sps';
+    updateGaugeTicks();
+    updateConfig();
+    savePrefs();
+  });
+
+  /* ── Live link status helpers ───────────────────────── */
+  const liveDot        = document.getElementById('live-dot');
+  const liveStatus     = document.getElementById('live-status');
+  const liveSourceBadge= document.getElementById('live-source-badge');
+
+  function setLiveState(state) {
+    // state: 'live' | 'trying' | 'offline'
+    liveDot.className    = 'live-dot ' + (state === 'live' ? 'live' : state === 'trying' ? 'trying' : '');
+    liveStatus.className = 'live-status ' + (state === 'live' ? 'live' : state === 'trying' ? 'trying' : '');
+    liveSourceBadge.className = 'live-source-badge ' + (state === 'live' ? 'live' : '');
+
+    if (state === 'live') {
+      liveStatus.textContent     = 'CHIRAL NETWORK LIVE — RECEIVING PHONE STEPS';
+      liveSourceBadge.textContent= 'LIVE FEED';
+    } else if (state === 'trying') {
+      liveStatus.textContent     = 'CONNECTING TO DRAWBRIDGE SERVER…';
+      liveSourceBadge.textContent= 'MANUAL MODE';
+    } else {
+      liveStatus.textContent     = 'DRAWBRIDGE SERVER OFFLINE — MANUAL MODE ACTIVE';
+      liveSourceBadge.textContent= 'MANUAL MODE';
+    }
+    liveConnected = (state === 'live');
+  }
+
+  /* ── WebSocket client with auto-reconnect ───────────── */
+  let _ws = null;
+  let _wsRetryTimer = null;
+
+  function connectWS() {
+    if (_ws && (_ws.readyState === WebSocket.OPEN || _ws.readyState === WebSocket.CONNECTING)) return;
+    setLiveState('trying');
+    _ws = new WebSocket(WS_URL);
+
+    _ws.onopen = () => {
+      clearTimeout(_wsRetryTimer);
+      setLiveState('live');
+      const line = document.createElement('div');
+      line.className = 'log-entry jog';
+      line.textContent = '[WS] Live link established — receiving real steps from phone.';
+      logArea.appendChild(line);
+      logArea.scrollTop = logArea.scrollHeight;
+    };
+
+    _ws.onmessage = (evt) => {
+      try {
+        const msg = JSON.parse(evt.data);
+        if (msg.event === 'step') {
+          triggerStep();   // use timestamp-based cadence from UI sliders
+        } else if (msg.event === 'stop') {
+          // Treat stop as cadence decay — no extra action needed,
+          // scheduleDecay() is already called by triggerStep
+        }
+      } catch(e) {}
+    };
+
+    _ws.onerror = () => {};   // onclose handles retry
+
+    _ws.onclose = () => {
+      setLiveState('offline');
+      // Retry in 3 seconds
+      _wsRetryTimer = setTimeout(connectWS, 3000);
+    };
+  }
+
+  /* ── Init ────────────────────────────────────────────── */
+  loadPrefs();
+  updateGaugeTicks();
+  updateConfig();
+  connectWS();  // attempt live link immediately
+</script>
+</body>
+</html>
