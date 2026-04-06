@@ -33,7 +33,33 @@ class StepTrackerService : Service(), SensorEventListener {
     
     private var stepCount = 0
     private var lastStepTime = 0L
-    private val STEP_COOLDOWN_MS = 300L
+
+    // ── Step detection pipeline constants ─────────────────────────────────────
+    // Low-pass filter smoothing factor: 0 < alpha < 1
+    //   Lower  → smoother signal, better for slow walks, slightly more lag
+    //   Higher → noisier signal, faster response
+    private val FILTER_ALPHA = 0.15f
+
+    // Adaptive cooldown bounds (ms)
+    private val MIN_STEP_INTERVAL_MS = 250L   // ~4 steps/sec max (sprinting)
+    private val MAX_STEP_INTERVAL_MS = 1400L  // ~0.7 steps/sec min (very slow)
+
+    // Sliding window for computing dynamic min/max of the filtered signal (ms)
+    private val DYNAMIC_WINDOW_MS = 2000L
+
+    // Peak sensitivity: what fraction of the (max-min) range the signal must
+    // exceed before being considered a candidate peak.
+    // Mapped from the user's sensitivity slider: MIN_PEAK_FACTOR = most sensitive.
+    private val MIN_PEAK_FACTOR = 0.22f
+    private val MAX_PEAK_FACTOR = 0.72f
+
+    // ── Step detection pipeline state ─────────────────────────────────────────
+    private var filteredMagnitude = 0f        // current EMA output
+    private var isArmed           = false     // true after signal rises above threshold
+    private var peakValue         = 0f        // highest value seen while armed
+
+    // Circular buffer of (timestamp, filteredMagnitude) used for dynamic range
+    private val signalHistory = ArrayDeque<Pair<Long, Float>>(128)
 
     private val stopHandler = Handler(Looper.getMainLooper())
     private val stopRunnable = Runnable { sendEventToServer("stop") }
@@ -133,6 +159,13 @@ class StepTrackerService : Service(), SensorEventListener {
         currentStepCount = 0
         stepUpdateListener?.invoke(stepCount)
 
+        // Reset detection pipeline state
+        filteredMagnitude = 0f
+        isArmed           = false
+        peakValue         = 0f
+        signalHistory.clear()
+        lastStepTime = 0L
+
         accelerometerSensor?.let {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME)
         }
@@ -152,28 +185,81 @@ class StepTrackerService : Service(), SensorEventListener {
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
-            val x = event.values[0]
-            val y = event.values[1]
-            val z = event.values[2]
-            
-            // Subtract gravity for a hardware-accelerated linear acceleration estimate
-            val rawMagnitude = Math.sqrt((x * x + y * y + z * z).toDouble()).toFloat()
-            val magnitude = Math.abs(rawMagnitude - SensorManager.GRAVITY_EARTH)
-            
-            val currentTime = System.currentTimeMillis()
-            
-            if (magnitude > stepThreshold && (currentTime - lastStepTime) > STEP_COOLDOWN_MS) {
-                lastStepTime = currentTime
-                stepCount++
-                currentStepCount = stepCount
-                
-                stepUpdateListener?.invoke(stepCount)
+        if (event?.sensor?.type != Sensor.TYPE_ACCELEROMETER) return
 
-                stopHandler.removeCallbacks(stopRunnable)
-                sendEventToServer("step")
-                
-                stopHandler.postDelayed(stopRunnable, 400L)
+        val x = event.values[0]
+        val y = event.values[1]
+        val z = event.values[2]
+
+        // ─── Stage 1: Gravity-subtracted magnitude ────────────────────────────
+        val rawMagnitude = Math.sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+        val rawLinear    = Math.abs(rawMagnitude - SensorManager.GRAVITY_EARTH)
+
+        // ─── Stage 2: Exponential low-pass filter (EMA) ───────────────────────
+        // Initialise filter on first sample
+        if (filteredMagnitude == 0f) filteredMagnitude = rawLinear
+        filteredMagnitude = FILTER_ALPHA * rawLinear + (1f - FILTER_ALPHA) * filteredMagnitude
+
+        val now = System.currentTimeMillis()
+
+        // ─── Stage 3: Sliding-window dynamic range ────────────────────────────
+        signalHistory.addLast(Pair(now, filteredMagnitude))
+        // Prune samples older than DYNAMIC_WINDOW_MS
+        while (signalHistory.isNotEmpty() && now - signalHistory.first().first > DYNAMIC_WINDOW_MS) {
+            signalHistory.removeFirst()
+        }
+
+        val dynMin  = signalHistory.minOf { it.second }
+        val dynMax  = signalHistory.maxOf { it.second }
+        val dynRange = dynMax - dynMin
+
+        // Map stepThreshold (user slider, e.g. 0.5–4.0) to a peak factor.
+        // stepThreshold is in range [0.5, 4.5]; map linearly to [MIN, MAX] peak factor.
+        val sliderNorm   = ((stepThreshold - 0.5f) / 4.0f).coerceIn(0f, 1f)
+        val peakFactor   = MIN_PEAK_FACTOR + sliderNorm * (MAX_PEAK_FACTOR - MIN_PEAK_FACTOR)
+        val armThreshold = dynMin + dynRange * peakFactor
+        // Reset line: signal must fall below this after a peak to re-enable detection
+        val resetLine    = dynMin + dynRange * (peakFactor * 0.5f)
+
+        // ─── Stage 4: Hysteresis ARM → TRIGGER state machine ─────────────────
+        val timeSinceLastStep = now - lastStepTime
+
+        // Only process if past the minimum cooldown
+        if (timeSinceLastStep >= MIN_STEP_INTERVAL_MS) {
+
+            if (!isArmed) {
+                // Arm when signal rises above the dynamic threshold
+                if (filteredMagnitude > armThreshold && dynRange > 0.10f) {
+                    isArmed   = true
+                    peakValue = filteredMagnitude
+                }
+            } else {
+                // Track peak while armed
+                if (filteredMagnitude > peakValue) peakValue = filteredMagnitude
+
+                // Trigger (step!) when signal drops back below the reset line
+                if (filteredMagnitude < resetLine) {
+                    isArmed = false
+
+                    // Adaptive cooldown: estimate next expected interval from recent cadence,
+                    // clamped to [MIN, MAX]. This prevents double-triggers at high cadence
+                    // while staying responsive at low cadence.
+                    val adaptiveCooldown = timeSinceLastStep
+                        .coerceIn(MIN_STEP_INTERVAL_MS, MAX_STEP_INTERVAL_MS)
+
+                    // Guard: must still be within the adaptive window
+                    if (timeSinceLastStep >= adaptiveCooldown || lastStepTime == 0L) {
+                        lastStepTime   = now
+                        stepCount++
+                        currentStepCount = stepCount
+
+                        stepUpdateListener?.invoke(stepCount)
+
+                        stopHandler.removeCallbacks(stopRunnable)
+                        sendEventToServer("step")
+                        stopHandler.postDelayed(stopRunnable, 500L)
+                    }
+                }
             }
         }
     }
